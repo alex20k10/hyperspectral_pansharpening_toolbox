@@ -1,4 +1,4 @@
-ds_root: '/media/matteo/T7/Datasets/HyperSpectral/'
+ds_root: './Dataset'
 
 datasets: ['PRISMA']
 sensor: 'PRISMA'
