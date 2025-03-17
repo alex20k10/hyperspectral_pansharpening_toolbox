@@ -1,5 +1,4 @@
-gpu_number: '3'
-
+gpu_number: '0'
 
 # Hyperparameters
 learning_rate: 0.00005
@@ -17,9 +16,4 @@ last_wl: 770
 
 num_blocks: 2    # Number of hyperspectral blocks
 n_components: 4  # Number of principal components to extract
-
-
-
-
-
 
