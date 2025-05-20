@@ -10,10 +10,15 @@ from scipy import io
 from torch.nn import functional as func
 from Utils.spectral_tools import mtf, mtf_pan
 from Utils.interpolator_tools import ideal_interpolator
+import rasterio
 
 # Constants
 random.seed(3)
 LIST_BANDS = np.concatenate([list(range(7, 63)), list(range(71, 86)), list(range(89, 107)), list(range(120, 150)), list(range(176, 216))])
+
+swir_pth = ""
+vnir_pth = ""
+pan_pth = ""
 
 TEST_FILES = ['PRS_L2D_STD_20230908173127_20230908173131_0001.he5',
               'PRS_L2D_STD_20230824100356_20230824100400_0001.he5',
@@ -46,23 +51,22 @@ INIT_COLS_RR = {'PRS_L2D_STD_20230908173127_20230908173131_0001.he5': 40,
                 'PRS_L2D_STD_20231120102229_20231120102233_0001.he5': 36}
 
 
-def he5_to_mat(filename, list_bands):
-    with h5py.File(filename, 'r') as h5f:
-        SWIR = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/SWIR_Cube'][()], dtype=np.uint16)
-        VNIR = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/VNIR_Cube'][()], dtype=np.uint16)
-        pan = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_PCO/Data Fields/Cube'][()], dtype=np.uint16)
+def he5_to_mat(filenames, list_bands):
+    SWIR = rasterio.open(filenames[0]).read()
+    VNIR = rasterio.open(filenames[1]).read()
+    pan = rasterio.open(filenames[2]).read()
 
-        VNIR = np.flip(np.moveaxis(VNIR, 1, 2), axis=-1)
-        SWIR = np.flip(np.moveaxis(SWIR, 1, 2), axis=-1)
+    VNIR = np.flip(np.moveaxis(VNIR, 1, 2), axis=-1)
+    SWIR = np.flip(np.moveaxis(SWIR, 1, 2), axis=-1)
 
-        wl_VNIR = np.linspace(400, 1010, 66).astype(np.float32)
-        wl_SWIR = np.linspace(920, 2505, 173).astype(np.float32)
-        wl = np.concatenate((wl_VNIR, wl_SWIR))
+    wl_VNIR = np.linspace(400, 1010, 66).astype(np.float32)
+    wl_SWIR = np.linspace(920, 2505, 173).astype(np.float32)
+    wl = np.concatenate((wl_VNIR, wl_SWIR))
 
-        overlap = np.max([i for i, value in enumerate(wl[list_bands]) if value < 701])
+    overlap = np.max([i for i, value in enumerate(wl[list_bands]) if value < 701])
 
-        hs = np.concatenate((VNIR, SWIR), axis=2)
-        return hs[:, :, list_bands], pan, wl[list_bands], overlap
+    hs = np.concatenate((VNIR, SWIR), axis=2)
+    return hs[:, :, list_bands], pan, wl[list_bands], overlap
 
 
 def interpolate_hs(hs, ratio):
