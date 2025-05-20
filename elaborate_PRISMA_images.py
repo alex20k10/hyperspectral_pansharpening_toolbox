@@ -48,12 +48,20 @@ INIT_COLS_RR = {'PRS_L2D_STD_20230908173127_20230908173131_0001.he5': 40,
 
 def he5_to_mat(filename, list_bands):
     with h5py.File(filename, 'r') as h5f:
-        SWIR = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/SWIR_Cube'][()], dtype=np.uint16)
-        VNIR = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_HCO/Data Fields/VNIR_Cube'][()], dtype=np.uint16)
-        pan = np.array(h5f['HDFEOS/SWATHS/PRS_L2D_PCO/Data Fields/Cube'][()], dtype=np.uint16)
+        SWIR = np.array(h5f['MODIS_Grid_500m_2D/SWIR'][()], dtype=np.uint16)
+        VNIR = np.array(h5f['MODIS_Grid_500m_2D/VNIR'][()], dtype=np.uint16)
+        pan = np.array(h5f['MODIS_Grid_500m_2D/PAN'][()], dtype=np.uint16)
 
-        VNIR = np.flip(np.moveaxis(VNIR, 1, 2), axis=-1)
-        SWIR = np.flip(np.moveaxis(SWIR, 1, 2), axis=-1)
+        print(SWIR.shape)
+        print(VNIR.shape)
+        print(pan.shape)
+
+        VNIR = np.flip(np.moveaxis(VNIR, 0, -1), axis=-1)
+        SWIR = np.flip(np.moveaxis(SWIR, 0, -1), axis=-1)
+
+        print(SWIR.shape)
+        print(VNIR.shape)
+        print(pan.shape)
 
         wl_VNIR = np.linspace(400, 1010, 66).astype(np.float32)
         wl_SWIR = np.linspace(920, 2505, 173).astype(np.float32)
